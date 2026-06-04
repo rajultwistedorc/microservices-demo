@@ -1,0 +1,82 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: microservices
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d microservices"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  user-service:
+    build: ./services/user-service
+    environment:
+      DATABASE_URL: postgresql://postgres:postgres@postgres:5432/microservices
+      REDIS_URL: redis://redis:6379/0
+      PORT: "5001"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    ports:
+      - "5001:5001"
+
+  order-service:
+    build: ./services/order-service
+    environment:
+      DATABASE_URL: postgresql://postgres:postgres@postgres:5432/microservices
+      REDIS_URL: redis://redis:6379/0
+      USER_SERVICE_URL: http://user-service:5001
+      NOTIFICATION_CHANNEL: notifications
+      PORT: "5002"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      user-service:
+        condition: service_started
+    ports:
+      - "5002:5002"
+
+  notification-service:
+    build: ./services/notification-service
+    environment:
+      REDIS_URL: redis://redis:6379/0
+      NOTIFICATION_CHANNEL: notifications
+      PORT: "5003"
+    depends_on:
+      redis:
+        condition: service_healthy
+    ports:
+      - "5003:5003"
+
+  api-gateway:
+    build: ./services/api-gateway
+    ports:
+      - "8080:80"
+    depends_on:
+      - user-service
+      - order-service
+      - notification-service
+
+volumes:
+  postgres_data:
