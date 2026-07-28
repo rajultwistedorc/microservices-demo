@@ -115,3 +115,14 @@ microservices-demo/
 | `REDIS_URL` | `redis://redis:6379/0` | all |
 | `USER_SERVICE_URL` | `http://user-service:5001` | order |
 | `NOTIFICATION_CHANNEL` | `notifications` | order, notification |
+
+## Live Screenshots
+
+### API Gateway
+![Gateway](screenshots/gateway.png)
+
+### Users Service
+![Users](screenshots/users.png)
+
+### Orders Service
+![Orders](screenshots/orders.png)
