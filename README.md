@@ -126,3 +126,14 @@ microservices-demo/
 
 ### Orders Service
 ![Orders](screenshots/orders.png)
+
+## Live Screenshots
+
+### API Gateway
+![Gateway](screenshots/gateway.png)
+
+### Users Service
+![Users](screenshots/users.png)
+
+### Orders Service
+![Orders](screenshots/orders.png)
